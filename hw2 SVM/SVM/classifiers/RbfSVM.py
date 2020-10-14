@@ -2,11 +2,12 @@ import numpy as np
 import random
 from dataloader import load_data
 from Kernel import Kernel
+from utils import plot_curves
 
 class RbfSVM(object):
-    def __init__(self, data, batch_size = 200, learning_rate = 1e-3, epochs = 100, reg_type = 0, reg_weight = 1e-5, hinge_weight = 1, kernel_type = None):
+    def __init__(self, data, batch_size = 200, learning_rate = 1e-7, epochs = 50, reg_type = 2, reg_weight = 0.1):
         #初始化参数
-        self.x_train, self.x_test, self.y_train, self.y_test = data
+        self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test = data
         self.N = len(self.x_train)
         self.alpha = np.random.randn(self.N, ) * 0.0001
 
@@ -17,9 +18,7 @@ class RbfSVM(object):
         self.epochs = epochs
         self.reg_type = 0 #0：不正则化 1:L1正则化 2：L2正则化
         self.reg_weight = reg_weight #正则化的weight
-        self.hinge_weight = hinge_weight #hinge loss的权重
-        self.kernel_type = kernel_type
-        self.kernel = Kernel(kernel_type)
+        self.kernel = Kernel()
 
     def run(self):
         '''
@@ -30,15 +29,24 @@ class RbfSVM(object):
         max_acc = 0
         self.kernel.init_sigma(self.x_train)
         self.kernel.init_K(self.x_train)
-
+        loss_train_list = []
+        acc_train_list = []
+        loss_eval_list = []
+        acc_eval_list = []
         best_alpha = self.alpha.copy()
         for i in range(self.epochs):
             loss_train, acc_train = self.train_or_eval("Train", self.x_train, self.y_train, i + 1)
             loss_eval, acc_eval = self.train_or_eval("Eval", self.x_test, self.y_test, i + 1)
+            loss_train_list.append(loss_train)
+            loss_eval_list.append(loss_eval)
+            acc_train_list.append(acc_train)
+            acc_eval_list.append(acc_eval)
             if acc_eval > max_acc:
                 max_acc = acc_eval
                 best_alpha = self.alpha.copy()
-        return best_alpha
+        self.alpha = best_alpha.copy()
+        loss_test, acc_test = self.train_or_eval("Test", self.x_test, self.y_test, self.epochs)
+        plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
 
     def train_or_eval(self, mode, X, y, epoch):
         '''
@@ -55,23 +63,24 @@ class RbfSVM(object):
         for i in range(N):
             x_i = X[i]
             y_i = y[i]
-            if(y_i == 0):
+            if y_i == 0:
                 y_i = -1
 
             result = 0
-            for j in range(N):
-                y_j = y[j]
-                x_j = X[j]
+            for j in range(self.N):
+                y_j = self.y_train[j]
+                x_j = self.x_train[j]
                 if y_j == 0:
                     y_j = -1
-                result += y_j * self.alpha[j] * self.kernel.get(x_i, x_j)
-            if result >= 0:
+                new_num = y_j * self.alpha[j] * self.kernel.get(x_i, x_j)
+                result += new_num
+            if result * y_i >= 0:
                 total_right += 1
         acc = total_right / N
         loss, dalpha = self.SGD(X, y)
         if mode == 'Train':
             self.alpha -= self.learning_rate * dalpha
-        print("{} Epoch:[{}/{}] Accuracy:{:.2f} Loss:{:.2f}".format(mode, epoch, self.epochs, acc, loss))
+        print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
         return loss, acc
 
     def SGD(self, X, y):
@@ -115,8 +124,8 @@ class RbfSVM(object):
                 loss += (1 - difference)
 
             
-        dalpha = dalpha / self.batch_size * self.hinge_weight
-        loss = loss / self.batch_size * self.hinge_weight
+        dalpha = dalpha / self.batch_size
+        loss = loss / self.batch_size
 
         #考虑K*alpha^T
         loss += np.matmul(self.alpha.T, np.matmul(self.kernel.K, self.alpha)) / 2

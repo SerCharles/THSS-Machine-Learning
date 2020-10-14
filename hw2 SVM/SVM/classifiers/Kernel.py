@@ -6,7 +6,8 @@ class Kernel(object):
         list_num = []
         for i in range(len(X)):
             for j in range(len(X)):
-                dist = np.linalg.norm(X[i] - X[j], ord = 2, axis = 0, keepdims=False)
+                diff = X[i] - X[j]
+                dist = np.dot(diff, diff)
                 list_num.append(dist)
         list_num.sort()
         length = len(list_num)
@@ -24,7 +25,9 @@ class Kernel(object):
         self.K = K
 
     def get(self, x, y):
-        dist = np.linalg.norm(x - y, ord = 2, axis = 0, keepdims=False)
+        diff = x - y
+        dist = np.dot(diff, diff)
         exp_up = - dist / 2 / self.sigma
         result = math.exp(exp_up)
+        result += 1
         return result

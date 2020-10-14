@@ -1,10 +1,11 @@
 import numpy as np
 import random
 from dataloader import load_data
-import matplotlib.pyplot as plt
+from utils import plot_curves
+
 
 class LinearSVM(object):
-    def __init__(self, data, batch_size = 200, learning_rate = 2e-6, epochs = 100, reg_type = 2, reg_weight = 10):
+    def __init__(self, data, batch_size = 200, learning_rate = 2e-6, epochs = 50, reg_type = 0, reg_weight = 10):
         #初始化参数
         self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test = data
         self.N = len(self.x_train)
@@ -42,34 +43,9 @@ class LinearSVM(object):
                 best_W = self.W.copy()
         self.W = best_W.copy()
         loss_test, acc_test = self.train_or_eval("Test", self.x_test, self.y_test, self.epochs)
-        self.plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
+        plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
 
-    def plot_curves(self, loss_train, loss_eval, acc_train, acc_eval):
-        '''
-        描述：绘制训练-测试曲线
-        参数：训练，测试的准确度
-        返回：无
-        '''
-        x_axix = []
-        for i in range(self.epochs):
-            x_axix.append(i)
-        plt.title('Loss Comparison')
-        plt.plot(x_axix, loss_train, color='red', label='training loss')
-        plt.plot(x_axix, loss_eval, color='blue', label='valid loss')
-        plt.legend() # 显示图例
 
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.show()
-
-        plt.title('Accuracy Comparison')
-        plt.plot(x_axix, acc_train, color='red', label='training accuracy')
-        plt.plot(x_axix, acc_eval, color='blue', label='valid accuracy')
-        plt.legend() # 显示图例
-
-        plt.xlabel('Epochs')
-        plt.ylabel('Loss')
-        plt.show()
 
     def train_or_eval(self, mode, X, y, epoch):
         '''
