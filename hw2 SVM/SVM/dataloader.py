@@ -11,7 +11,7 @@ def load_data():
         参数：无
         返回：x_train, y_train, x_val, y_val, x_test, y_test
     '''
-    diabetes = pd.read_csv('svm/datasets/diabetes.csv')
+    diabetes = pd.read_csv('datasets/diabetes.csv')
     x_train, x_test, y_train, y_test = train_test_split(np.array(diabetes.loc[:, diabetes.columns != 'Outcome']), np.array(diabetes['Outcome']), stratify=np.array(diabetes['Outcome']), random_state=66)
     # Split the data into train, val, and test sets. In addition we will
     # create a small development set as a subset of the training data;
@@ -47,3 +47,4 @@ def load_data():
     
     
     return X_train, y_train, X_val, y_val, X_test, y_test
+

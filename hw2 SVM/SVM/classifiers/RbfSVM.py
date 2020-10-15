@@ -1,11 +1,10 @@
 import numpy as np
 import random
-from dataloader import load_data
-from Kernel import Kernel
-from utils import plot_curves
+from .Kernel import Kernel
+
 
 class RbfSVM(object):
-    def __init__(self, data, batch_size = 200, learning_rate = 1e-7, epochs = 50, reg_type = 2, reg_weight = 0.1):
+    def __init__(self, data, batch_size = 200, learning_rate = 1e-6, epochs = 100, reg_type = 2, reg_weight = 0.1, whether_print = True):
         #初始化参数
         self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test = data
         self.N = len(self.x_train)
@@ -19,12 +18,14 @@ class RbfSVM(object):
         self.reg_type = 0 #0：不正则化 1:L1正则化 2：L2正则化
         self.reg_weight = reg_weight #正则化的weight
         self.kernel = Kernel()
+        self.whether_print = whether_print
+
 
     def run(self):
         '''
         描述：主函数
         参数：无
-        返回：最优的参数alpha
+        返回：loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
         '''
         max_acc = 0
         self.kernel.init_sigma(self.x_train)
@@ -46,7 +47,7 @@ class RbfSVM(object):
                 best_alpha = self.alpha.copy()
         self.alpha = best_alpha.copy()
         loss_test, acc_test = self.train_or_eval("Test", self.x_test, self.y_test, self.epochs)
-        plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
+        return loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
 
     def train_or_eval(self, mode, X, y, epoch):
         '''
@@ -80,7 +81,8 @@ class RbfSVM(object):
         loss, dalpha = self.SGD(X, y)
         if mode == 'Train':
             self.alpha -= self.learning_rate * dalpha
-        print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
+        if self.whether_print:  
+            print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
         return loss, acc
 
     def SGD(self, X, y):
@@ -142,8 +144,3 @@ class RbfSVM(object):
                     dalpha[i] -= self.reg_weight
         
         return loss, dalpha
-
-if __name__ == "__main__":
-    data = load_data()
-    svm = RbfSVM(data)
-    svm.run()

@@ -1,11 +1,9 @@
 import numpy as np
 import random
-from dataloader import load_data
-from utils import plot_curves
 
 
 class LinearSVM(object):
-    def __init__(self, data, batch_size = 200, learning_rate = 2e-6, epochs = 50, reg_type = 0, reg_weight = 10):
+    def __init__(self, data, batch_size = 200, learning_rate = 1e-6, epochs = 100, reg_type = 2, reg_weight = 1e-3, whether_print = True):
         #初始化参数
         self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test = data
         self.N = len(self.x_train)
@@ -18,12 +16,13 @@ class LinearSVM(object):
         self.epochs = epochs
         self.reg_type = 0 #0：不正则化 1:L1正则化 2：L2正则化
         self.reg_weight = reg_weight #正则化的weight
+        self.whether_print = whether_print
 
     def run(self):
         '''
         描述：主函数
         参数：无
-        返回：最优的参数W
+        返回：loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
         '''
         max_acc = 0
         best_W = self.W.copy()
@@ -43,7 +42,8 @@ class LinearSVM(object):
                 best_W = self.W.copy()
         self.W = best_W.copy()
         loss_test, acc_test = self.train_or_eval("Test", self.x_test, self.y_test, self.epochs)
-        plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
+        return loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
+        #plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
 
 
 
@@ -75,7 +75,8 @@ class LinearSVM(object):
         loss, dW = self.SGD(X, y)
         if mode == 'Train':
             self.W -= self.learning_rate * dW
-        print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
+        if self.whether_print:  
+            print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
         return loss, acc
 
     def SGD(self, X, y):
@@ -137,7 +138,3 @@ class LinearSVM(object):
         
         return loss, dW
 
-if __name__ == "__main__":
-    data = load_data()
-    svm = LinearSVM(data)
-    svm.run()
