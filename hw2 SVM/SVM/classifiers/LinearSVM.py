@@ -3,12 +3,12 @@ import random
 
 
 class LinearSVM(object):
-    def __init__(self, data, batch_size = 200, learning_rate = 1e-6, epochs = 100, reg_type = 2, reg_weight = 1e-3, whether_print = True):
+    def __init__(self, data, batch_size = 200, learning_rate = 1e-5, epochs = 100, reg_type = 2, reg_weight = 1e-3, whether_print = True):
         #初始化参数
         self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test = data
         self.N = len(self.x_train)
         self.W = np.random.randn(9, ) * 0.000001
-
+        self.W_average = self.W.copy()
 
         #定义各种超参数
         self.batch_size = batch_size #SGD的minibatch size
@@ -39,8 +39,8 @@ class LinearSVM(object):
             acc_eval_list.append(acc_eval)
             if acc_eval > max_acc:
                 max_acc = acc_eval
-                best_W = self.W.copy()
-        self.W = best_W.copy()
+                best_W = self.W_average.copy()
+        self.W_average = best_W.copy()
         loss_test, acc_test = self.train_or_eval("Test", self.x_test, self.y_test, self.epochs)
         return loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
         #plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
@@ -68,13 +68,14 @@ class LinearSVM(object):
             if(y_i == 0):
                 y_i = -1
 
-            result = np.dot(self.W, x_i) * y_i
-            if result >= 0:
+            result = np.dot(self.W_average, x_i) * y_i
+            if result > 0:
                 total_right += 1
         acc = total_right / N
         loss, dW = self.SGD(X, y)
         if mode == 'Train':
             self.W -= self.learning_rate * dW
+            self.W_average = (self.W_average * (epoch - 1) + self.W) / epoch
         if self.whether_print:  
             print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
         return loss, acc
@@ -129,12 +130,16 @@ class LinearSVM(object):
         #正则化
         if self.reg_type == 2 :
             dW += 2 * self.reg_weight * self.W
+            loss += self.reg_weight * np.dot(self.W, self.W)
         elif self.reg_type == 1: 
             for i in range(D):
                 if self.W[i] > 0:
                     dW[i] += self.reg_weight
+                    loss += self.reg_weight * self.W[i]
                 elif self.W[i] < 0:
                     dW[i] -= self.reg_weight
+                    loss -= self.reg_weight * self.W[i]
+
         
         return loss, dW
 

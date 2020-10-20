@@ -29,5 +29,5 @@ class Kernel(object):
         dist = np.dot(diff, diff)
         exp_up = - dist / 2 / self.sigma
         result = math.exp(exp_up)
-        result += 1
+        #result += 1
         return result

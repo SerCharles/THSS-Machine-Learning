@@ -6,9 +6,11 @@ from classifiers.RbfSVM import RbfSVM
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Choose model")
-    parser.add_argument("--type", type=str, default="Linear", help="Linear/Kernel")
+    parser.add_argument("--type", type=str, default="Kernel", help="Linear/Kernel")
+    parser.add_argument("--norm", type=int, default=1, help="Normalize or not")
+
     args = parser.parse_args()
-    data = load_data()
+    data = load_data(args.norm)
 
     if args.type == 'Linear':
         svm = LinearSVM(data)
