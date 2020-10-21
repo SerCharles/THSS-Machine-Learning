@@ -3,12 +3,13 @@ import random
 
 
 class LinearSVM(object):
-    def __init__(self, data, batch_size = 200, learning_rate = 1e-5, epochs = 100, reg_type = 2, reg_weight = 1e-3, whether_print = True):
+    def __init__(self, data, batch_size = 256, learning_rate = 1e-5, epochs = 2000, reg_type = 2, reg_weight = 1e-3, whether_print = True, whether_average = False):
         #初始化参数
         self.x_train, self.y_train, self.x_val, self.y_val, self.x_test, self.y_test = data
         self.N = len(self.x_train)
         self.W = np.random.randn(9, ) * 0.000001
-        self.W_average = self.W.copy()
+        self.current_W = self.W.copy()
+        self.W_list = []
 
         #定义各种超参数
         self.batch_size = batch_size #SGD的minibatch size
@@ -17,33 +18,22 @@ class LinearSVM(object):
         self.reg_type = 0 #0：不正则化 1:L1正则化 2：L2正则化
         self.reg_weight = reg_weight #正则化的weight
         self.whether_print = whether_print
+        self.whether_average = whether_average
 
     def run(self):
         '''
         描述：主函数
         参数：无
-        返回：loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
+        返回：loss_train_list, loss_test, acc_test
         '''
-        max_acc = 0
-        best_W = self.W.copy()
         loss_train_list = []
-        acc_train_list = []
-        loss_eval_list = []
-        acc_eval_list = []
         for i in range(self.epochs):
             loss_train, acc_train = self.train_or_eval("Train", self.x_train, self.y_train, i + 1)
-            loss_eval, acc_eval = self.train_or_eval("Eval", self.x_val, self.y_val, i + 1)
             loss_train_list.append(loss_train)
-            loss_eval_list.append(loss_eval)
-            acc_train_list.append(acc_train)
-            acc_eval_list.append(acc_eval)
-            if acc_eval > max_acc:
-                max_acc = acc_eval
-                best_W = self.W_average.copy()
-        self.W_average = best_W.copy()
+            if (i + 1) % 100 == 0:
+                loss_eval, acc_eval = self.train_or_eval("Eval", self.x_val, self.y_val, i + 1)
         loss_test, acc_test = self.train_or_eval("Test", self.x_test, self.y_test, self.epochs)
-        return loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test
-        #plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
+        return loss_train_list, loss_test, acc_test
 
 
 
@@ -57,27 +47,27 @@ class LinearSVM(object):
             epoch：当前epoch数
         返回：当前的loss和准确率
         '''
+        loss = 0.0
+        acc = 0
         N = X.shape[0]
-        total_right = 0
-        for i in range(N):
-            x_i = X[i]
-            x_i = x_i.tolist()
-            x_i.append(1)
-            x_i = np.array(x_i)
-            y_i = y[i]
-            if(y_i == 0):
-                y_i = -1
-
-            result = np.dot(self.W_average, x_i) * y_i
-            if result > 0:
-                total_right += 1
-        acc = total_right / N
-        loss, dW = self.SGD(X, y)
+        if (self.whether_print and epoch % 100 == 0) or mode == 'Test':
+            result = self.predict(X)
+            total_right = np.sum((result * y) > 0)
+            acc = total_right / N
         if mode == 'Train':
+            loss, dW = self.SGD(X, y)
             self.W -= self.learning_rate * dW
-            self.W_average = (self.W_average * (epoch - 1) + self.W) / epoch
-        if self.whether_print:  
-            print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
+            self.W_list.append(self.W.copy())
+            if self.whether_average:
+                self.current_W = np.mean(np.array(self.W_list), axis = 0)
+            else:
+                self.current_W = self.W 
+
+        if self.whether_print and epoch % 100 == 0:  
+            if mode == 'Train':
+                print("{} Epoch:[{}/{}] Accuracy:{:.4f} Loss:{:.4f}".format(mode, epoch, self.epochs, acc, loss))
+            else: 
+                print("{} Epoch:[{}/{}] Accuracy:{:.4f}".format(mode, epoch, self.epochs, acc))
         return loss, acc
 
     def SGD(self, X, y):
@@ -119,15 +109,8 @@ class LinearSVM(object):
         loss /= self.batch_size
         dW /= self.batch_size
 
-        #考虑前面那一项
-        #W_front = np.array(self.W.tolist()[:8])
-        loss += np.dot(self.W, self.W)
-        #dW_front = self.W.tolist()[:8]
-        #dW_front.append(0)
-        #dW_front = np.array(dW_front)
-        dW += self.W
-
         #正则化
+        #最前面的 alpha*K*alpha啥的我没在之前考虑，和同学交流之后得知这个属于正则项的一部分，hinge loss才是真正的loss
         if self.reg_type == 2 :
             dW += 2 * self.reg_weight * self.W
             loss += self.reg_weight * np.dot(self.W, self.W)
@@ -143,3 +126,20 @@ class LinearSVM(object):
         
         return loss, dW
 
+    def predict(self, X):
+        '''
+        描述：预测函数
+        参数：X
+        返回：输出结果y
+        '''
+        N = X.shape[0]
+        total_right = 0
+        y = np.zeros(N)
+        for i in range(N):
+            x_i = X[i]
+            x_i = x_i.tolist()
+            x_i.append(1)
+            x_i = np.array(x_i)
+            result = np.dot(self.current_W, x_i)
+            y[i] = result
+        return y

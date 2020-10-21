@@ -21,4 +21,4 @@ if __name__ == "__main__":
     parser.add_argument("--type", type=str, default="linear", help = "linear/rbf")
     parser.add_argument("--norm", type=int, default=1, help="Normalize or not")
     args = parser.parse_args()
-    run_sklearn(args.type)
+    run_sklearn(args)

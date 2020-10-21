@@ -16,5 +16,5 @@ if __name__ == "__main__":
         svm = LinearSVM(data)
     else: 
         svm = RbfSVM(data)
-    loss_train_list, loss_eval_list, acc_train_list, acc_eval_list, loss_test, acc_test = svm.run()
-    plot_curves(loss_train_list, loss_eval_list, acc_train_list, acc_eval_list)
+    loss_train_list, loss_test, acc_test = svm.run()
+    plot_curves(loss_train_list)
