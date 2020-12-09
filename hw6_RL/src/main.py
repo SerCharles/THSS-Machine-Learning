@@ -10,7 +10,7 @@ def main():
     env = gym.make('Taxi-v3')
 
     # q_learning
-    Q1, Q_rewards = Sarsa(env, num_episodes)
+    Q1, Q_rewards = QLearning(env, num_episodes)
     render_single_Q(env, Q1)
     evaluate_Q(env, Q1, 200)
 

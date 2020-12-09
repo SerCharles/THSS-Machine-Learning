@@ -27,7 +27,12 @@ def render_single_Q(env, Q):
     print("Episode reward: %f" % episode_reward)
 
 
-def evaluate_Q(env, Q, num_episodes=100):
+def evaluate_Q(env, Q, num_episodes = 100):
+    '''
+    描述：测试函数
+    参数：环境，策略函数Q，多少个episode
+    返回：平均V
+    '''
     tot_reward = 0
     for i in range(num_episodes):
         episode_reward = 0
@@ -40,3 +45,4 @@ def evaluate_Q(env, Q, num_episodes=100):
         tot_reward += episode_reward
     print("Total", tot_reward, "reward in", num_episodes, "episodes")
     print("Average Reward:", tot_reward / num_episodes)
+    return tot_reward / num_episodes
