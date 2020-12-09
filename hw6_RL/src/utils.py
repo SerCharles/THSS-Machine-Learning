@@ -12,6 +12,11 @@ def init_args():
     parser.add_argument("--algorithm", type = str, default = 'QLearning')
     parser.add_argument("--num_train", type = int, default = 5000)
     parser.add_argument("--num_test", type = int, default = 1000)
+    parser.add_argument("--gamma", type = float, default = 0.95)
+    parser.add_argument("--lr", type = float, default = 0.1)
+    parser.add_argument("--e", type = float, default = 1)
+    parser.add_argument("--decay_rate", type = float, default = 0.99)
+    parser.add_argument("--l", type = float, default = 0.5)
     parser.add_argument("--seed", type = int, default = 1453)
     parser.add_argument("--show", type = int, default = 0)
     args = parser.parse_args()
@@ -44,7 +49,7 @@ def render_single_Q(args, env, Q):
 def evaluate_Q(args, env, Q, num_episodes = 100):
     '''
     描述：测试函数
-    参数：环境，策略函数Q，多少个episode
+    参数：全局参数，环境，策略函数Q，多少个episode
     返回：平均V
     '''
     np.random.seed(args.seed)
