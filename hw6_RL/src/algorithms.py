@@ -113,8 +113,34 @@ def Sarsa(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
     np.array
     An array of shape [env.nS x env.nA] representing state, action values
     """
+    Q = np.zeros((env.nS, env.nA))
+    episode_reward = np.zeros((num_episodes,))
+    for i in range(num_episodes):
+        tmp_episode_reward = 0
+        s = env.reset()
+        while (True):
+            if np.random.rand() > e:
+                a = np.argmax(Q[s])
+            else:
+                a = np.random.randint(env.nA)
+            nexts, reward, done, info = env.step(a)
+            s_next = nexts
+            
+            if np.random.rand() > e:
+                a_next = np.argmax(Q[s_next])
+            else:
+                a_next = np.random.randint(env.nA)
 
-    ############################
-    # YOUR IMPLEMENTATION HERE #
-    ############################
-    pass
+            Q[s][a] += lr * (reward + gamma * Q[s_next][a_next] - Q[s][a])
+            tmp_episode_reward += reward
+            s = s_next
+            a = a_next
+            if done:
+                break
+        episode_reward[i] = tmp_episode_reward
+        print("Total reward until episode", i + 1, ":", tmp_episode_reward)
+        sys.stdout.flush()
+        if i % 10 == 0:
+            e = e * decay_rate
+    return Q, episode_reward
+

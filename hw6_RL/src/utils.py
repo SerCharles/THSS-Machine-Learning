@@ -2,6 +2,7 @@ import time
 import numpy as np
 
 
+
 def render_single_Q(env, Q):
     """Renders Q function once on environment. Watch your agent play!
 
