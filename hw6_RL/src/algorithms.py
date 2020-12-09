@@ -2,8 +2,7 @@ import numpy as np
 import sys
 
 
-def QLearning(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
-    # num_episodes=5000, gamma=0.95, lr=0.1, e=0.8, decay_rate=0.99
+def QLearning(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_rate = 0.99):
     """Learn state-action values using the Q-learning algorithm with epsilon-greedy exploration strategy.
     Update Q at the end of every episode.
 
@@ -28,6 +27,8 @@ def QLearning(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
     np.array
     An array of shape [env.nS x env.nA] representing state, action values
     """
+    np.random.seed(args.seed)
+
     Q = np.zeros((env.nS, env.nA))
     episode_reward = np.zeros((num_episodes,))
     for i in range(num_episodes):
@@ -46,15 +47,15 @@ def QLearning(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
             if done:
                 break
         episode_reward[i] = tmp_episode_reward
-        print("Total reward until episode", i + 1, ":", tmp_episode_reward)
-        sys.stdout.flush()
+        if args.show:
+            print("Total reward until episode", i + 1, ":", tmp_episode_reward)
+            sys.stdout.flush()
         if i % 10 == 0:
             e = e * decay_rate
     return Q, episode_reward
 
 
-def Sarsa_lambda(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99, l=0.5):
-    # num_episodes=5000, gamma=0.95, lr=0.1, e=0.8, decay_rate=0.99
+def Sarsa_lambda(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_rate = 0.99, l = 0.5):
     """Learn state-action values using the Sarsa lambda algorithm with epsilon-greedy exploration strategy.
     Update Q at the end of every episode.
 
@@ -81,6 +82,7 @@ def Sarsa_lambda(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.9
     np.array
     An array of shape [env.nS x env.nA] representing state, action values
     """
+    np.random.seed(args.seed)
     Q = np.zeros((env.nS, env.nA))
     E = np.zeros((env.nS, env.nA))
 
@@ -112,15 +114,15 @@ def Sarsa_lambda(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.9
             if done:
                 break
         episode_reward[i] = tmp_episode_reward
-        print("Total reward until episode", i + 1, ":", tmp_episode_reward)
-        sys.stdout.flush()
+        if args.show:
+            print("Total reward until episode", i + 1, ":", tmp_episode_reward)
+            sys.stdout.flush()
         if i % 10 == 0:
             e = e * decay_rate
     return Q, episode_reward
 
 
-def Sarsa(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
-    # num_episodes=5000, gamma=0.95, lr=0.1, e=0.8, decay_rate=0.99
+def Sarsa(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_rate = 0.99):
     """Learn state-action values using the Sarsa algorithm with epsilon-greedy exploration strategy.
     Update Q at the end of every episode.
 
@@ -145,6 +147,7 @@ def Sarsa(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
     np.array
     An array of shape [env.nS x env.nA] representing state, action values
     """
+    np.random.seed(args.seed)
     Q = np.zeros((env.nS, env.nA))
     episode_reward = np.zeros((num_episodes,))
     for i in range(num_episodes):
@@ -170,8 +173,9 @@ def Sarsa(env, num_episodes=5000, gamma=0.95, lr=0.1, e=1, decay_rate=0.99):
             if done:
                 break
         episode_reward[i] = tmp_episode_reward
-        print("Total reward until episode", i + 1, ":", tmp_episode_reward)
-        sys.stdout.flush()
+        if args.show:
+            print("Total reward until episode", i + 1, ":", tmp_episode_reward)
+            sys.stdout.flush()
         if i % 10 == 0:
             e = e * decay_rate
     return Q, episode_reward
