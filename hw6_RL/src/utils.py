@@ -65,16 +65,33 @@ def evaluate_Q(args, env, Q, num_episodes = 100):
     '''
     np.random.seed(args.seed)
     tot_reward = 0
+    rewards = []
+    average_steps = 0
     for i in range(num_episodes):
         episode_reward = 0
         state = env.reset()
         done = False
+        step = 0
         while not done:
+            step += 1
             action = np.argmax(Q[state])
             state, reward, done, _ = env.step(action)
             episode_reward += reward
+            
         tot_reward += episode_reward
+        average_steps += step
+        rewards.append(episode_reward)
+    average_reward = tot_reward / num_episodes
+    average_steps /= num_episodes
+    reward_variance = 0
+    for i in range(num_episodes):
+        reward_variance += (rewards[i] - average_reward) ** 2
+    reward_variance /= num_episodes
+    
     if args.show:
         print("Total", tot_reward, "reward in", num_episodes, "episodes")
-        print("Average Reward:", tot_reward / num_episodes)
+        print("Average Reward:", average_reward)
+        print("Reward Variance:", reward_variance)
+        print("Average steps:", average_steps)
+
     return tot_reward / num_episodes
