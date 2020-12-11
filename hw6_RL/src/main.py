@@ -14,13 +14,13 @@ def main(args):
 
     if args.algorithm == 'QLearning':
         Q1, Q_rewards = QLearning(args, env, args.num_train, \
-            gamma = args.gamma, lr = args.lr, e = args.e, decay_rate = args.decay_rate)
+            gamma = args.gamma_q, lr = args.lr_q, e = args.e_q, decay_rate = args.decay_rate_q)
     elif args.algorithm == 'Sarsa':
         Q1, Q_rewards = Sarsa(args, env, args.num_train, \
-            gamma = args.gamma, lr = args.lr, e = args.e, decay_rate = args.decay_rate)
+            gamma = args.gamma_sarsa, lr = args.lr_sarsa, e = args.e_sarsa, decay_rate = args.decay_rate_sarsa)
     elif args.algorithm == 'Sarsa_lambda':
         Q1, Q_rewards = Sarsa_lambda(args, env, args.num_train, \
-            gamma = args.gamma, lr = args.lr, e = args.e, decay_rate = args.decay_rate, l = args.l)
+            gamma = args.gamma_l, lr = args.lr_l, e = args.e_l, decay_rate = args.decay_rate_l, l = args.l)
 
     render_single_Q(args, env, Q1)
     evaluate_Q(args, env, Q1, args.num_test)

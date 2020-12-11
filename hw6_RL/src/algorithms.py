@@ -2,7 +2,7 @@ import numpy as np
 import sys
 
 
-def QLearning(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_rate = 0.99):
+def QLearning(args, env, num_episodes, gamma = 0.2, lr = 1, e = 1, decay_rate = 0.99):
     """Learn state-action values using the Q-learning algorithm with epsilon-greedy exploration strategy.
     Update Q at the end of every episode.
 
@@ -122,7 +122,7 @@ def Sarsa_lambda(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_r
     return Q, episode_reward
 
 
-def Sarsa(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_rate = 0.99):
+def Sarsa(args, env, num_episodes, gamma = 0.8, lr = 0.2, e = 0.5, decay_rate = 0.4):
     """Learn state-action values using the Sarsa algorithm with epsilon-greedy exploration strategy.
     Update Q at the end of every episode.
 
