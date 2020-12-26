@@ -64,18 +64,18 @@ python grid_search.py --algorithm=Sarsa_lambda
 
 #### 2.2 测试结果
 
-|                     | QLearning | Sarsa   | Sarsa_lambda |
-| ------------------- | --------- | ------- | ------------ |
-| **Average Reward**  | 7.873     | 7.395   | 7.222        |
-| **Reward Variance** | 7.077     | 136.149 | 94.191       |
-| **Average Steps**   | 13.127    | 13.542  | 13.736       |
+|                     | QLearning | Sarsa  | Sarsa_lambda |
+| ------------------- | --------- | ------ | ------------ |
+| **Average Reward**  | 7.873     | 7.887  | 7.658        |
+| **Reward Variance** | 7.077     | 6.784  | 7.831        |
+| **Average Steps**   | 13.127    | 13.542 | 13.342       |
 
 #### 2.3 分析
 
 首先分析训练情况：收敛性Sarsa>QLearning>Sarsa_lambda，Sarsa在1200个episode就基本收敛，而其他两个算法得到2000个episode才能收敛。同时，Sarsa的训练曲线在收敛后非常平稳，而QLearning就差一些，而Sarsa_lambda则不够平稳。
 
-其次分析测试情况：三者的平均准确率和平均步长相差不多，可以认为效果近似。但是稳定性三者有着较为明显的差异：QLearning稳定性最好，Sarsa_lambda次之，Sarsa稳定性最差。
+其次分析测试情况：三者的平均准确率、平均步长、平均方差相差不多，可以认为效果近似。
 
 最后分析训练时间：QLearning和Sarsa的训练时间都很短，几秒就能训练5000个episode，而Sarsa_lambda需要每次都更新整个Q和E矩阵，速度很慢，训练5000个episode需要接近一小时。
 
-综合分析三个算法，因为QLearning稳定性最高，而且训练较快，收敛性也不是很差，因此选用QLearning最佳。
+综合分析三个算法，三者效果差不多，而Sarsa lambda训练慢、收敛差，Sarsa的收敛性最好。因此最好选用Sarsa算法。

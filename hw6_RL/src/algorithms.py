@@ -84,10 +84,10 @@ def Sarsa_lambda(args, env, num_episodes, gamma = 0.95, lr = 0.1, e = 1, decay_r
     """
     np.random.seed(args.seed)
     Q = np.zeros((env.nS, env.nA))
-    E = np.zeros((env.nS, env.nA))
 
     episode_reward = np.zeros((num_episodes,))
     for i in range(num_episodes):
+        E = np.zeros((env.nS, env.nA))
         tmp_episode_reward = 0
         s = env.reset()
         while (True):
@@ -153,11 +153,12 @@ def Sarsa(args, env, num_episodes, gamma = 0.8, lr = 0.2, e = 0.5, decay_rate = 
     for i in range(num_episodes):
         tmp_episode_reward = 0
         s = env.reset()
+        if np.random.rand() > e:
+            a = np.argmax(Q[s])
+        else:
+            a = np.random.randint(env.nA)
         while (True):
-            if np.random.rand() > e:
-                a = np.argmax(Q[s])
-            else:
-                a = np.random.randint(env.nA)
+
             nexts, reward, done, info = env.step(a)
             s_next = nexts
             
